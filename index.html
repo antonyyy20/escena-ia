@@ -1,0 +1,591 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Escena IA · Edición n.º 1 · Video con inteligencia artificial para empresas</title>
+<meta name="description" content="Revista digital de emprendimiento: generación de videos con inteligencia artificial para empresas, la nueva forma de hacer marketing. Por Manuel Guillén.">
+<style>
+:root{
+  --studio:#030304; --paper:#0E0F12; --panel:#1B1D22; --ink:#EDEEF0; --slate:#A3A8B2;
+  --line:#2C2F36; --chroma:#D1FE17; --dark:#030304; --rec:#FF3B47;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{-webkit-print-color-adjust:exact;print-color-adjust:exact;background:var(--studio);color:var(--ink);font-family:"Times New Roman",Times,serif;font-size:12pt;line-height:1.5;overflow:hidden}
+
+/* ---------- Lector ---------- */
+.reader{height:100%;display:flex;flex-direction:column;align-items:center}
+.stage-wrap{flex:1;width:100%;display:flex;align-items:center;justify-content:center;padding:16px 16px 8px;min-height:0}
+.stage{position:relative;perspective:2600px}
+.book{position:absolute;top:0;left:0;width:816px;height:1056px;transform-origin:0 0}
+.page{position:absolute;inset:0;width:816px;height:1056px;overflow:hidden;background:var(--paper);
+  transform-origin:left center;transition:transform .9s cubic-bezier(.45,.05,.2,1),box-shadow .9s;
+  backface-visibility:hidden;-webkit-backface-visibility:hidden;box-shadow:0 0 0 1px #24272D,0 10px 40px rgba(209,254,23,.06)}
+.page.turned{transform:rotateY(-178deg);pointer-events:none}
+.page::after{content:"";position:absolute;top:0;bottom:0;left:0;width:18px;background:linear-gradient(90deg,rgba(0,0,0,.12),rgba(0,0,0,0));pointer-events:none}
+
+.toolbar{display:flex;align-items:center;gap:12px;padding:10px 16px 16px;color:#E9ECEF;flex-wrap:wrap;justify-content:center}
+.toolbar button,.toolbar select{font-family:inherit;font-size:16px;min-height:44px;border-radius:6px;cursor:pointer}
+.toolbar button{background:transparent;color:#E9ECEF;border:1px solid #6B7380;padding:0 18px}
+.toolbar button:hover:not(:disabled){border-color:#E9ECEF}
+.toolbar button:disabled{opacity:.35;cursor:default}
+.toolbar select{background:#1B1D22;color:#E9ECEF;border:1px solid #6B7380;padding:0 10px;max-width:220px}
+.counter{min-width:120px;text-align:center;font-size:16px}
+.counter .rec{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--rec);margin-right:8px;vertical-align:1px}
+:focus-visible{outline:3px solid var(--chroma);outline-offset:3px}
+.hint{font-size:14px;color:#AAB2BD;width:100%;text-align:center;margin-top:-4px}
+
+/* ---------- Tipografía de página ---------- */
+.pad{position:absolute;inset:0;padding:56px 64px 76px;display:flex;flex-direction:column}
+p{margin:0 0 12px;text-align:justify;hyphens:auto;-webkit-hyphens:auto}
+h2,h3{font-size:14pt;line-height:1.3;margin:0}
+h3{margin:0 0 6px}
+.small{font-size:14px;line-height:1.35;color:var(--slate)}
+.cols{columns:2;column-gap:32px}
+.cols p{break-inside:auto}
+.folio{position:absolute;left:64px;right:64px;bottom:26px;display:flex;justify-content:space-between;align-items:center;font-size:14px;color:var(--slate);border-top:1px solid var(--line);padding-top:8px}
+.folio b{color:var(--ink);font-size:16px}
+
+/* Claqueta de sección */
+.slate{display:flex;align-items:stretch;margin:0 0 18px;background:var(--panel);color:var(--ink)}
+.slate .sc{background:var(--chroma);color:var(--dark);padding:9px 14px;font-weight:700;font-size:14pt;line-height:1.3;white-space:nowrap}
+.slate h2{padding:9px 16px;font-weight:700}
+.slate .stripes{margin-left:auto;width:90px;background:repeating-linear-gradient(-55deg,var(--chroma) 0 9px,var(--panel) 9px 18px);opacity:.9}
+
+/* Visor de cámara */
+.vf{position:relative;overflow:hidden;background:var(--panel)}
+.vf img{width:100%;height:100%;object-fit:cover;display:block}
+.vf::before{content:"";position:absolute;inset:14px;pointer-events:none;z-index:1;
+  background:
+   linear-gradient(#fff,#fff) top left/22px 2px no-repeat, linear-gradient(#fff,#fff) top left/2px 22px no-repeat,
+   linear-gradient(#fff,#fff) top right/22px 2px no-repeat, linear-gradient(#fff,#fff) top right/2px 22px no-repeat,
+   linear-gradient(#fff,#fff) bottom left/22px 2px no-repeat, linear-gradient(#fff,#fff) bottom left/2px 22px no-repeat,
+   linear-gradient(#fff,#fff) bottom right/22px 2px no-repeat, linear-gradient(#fff,#fff) bottom right/2px 22px no-repeat}
+.vf .tc{position:absolute;top:22px;left:28px;z-index:2;color:#fff;font-size:14px;text-shadow:0 1px 3px rgba(0,0,0,.8);display:flex;align-items:center;gap:7px}
+.vf .tc i{width:9px;height:9px;border-radius:50%;background:var(--rec);display:inline-block}
+.vf figcaption{position:absolute;left:28px;right:28px;bottom:22px;z-index:2;color:#fff;font-size:14px;line-height:1.3;text-shadow:0 1px 3px rgba(0,0,0,.85)}
+
+/* Datos y gráficos */
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;border-top:2px solid var(--chroma);border-bottom:2px solid #4A4F58}
+.stat{padding:12px 16px 12px 0}
+.stat+.stat{border-left:1px solid var(--line);padding-left:16px}
+.stat .n{color:var(--chroma);font-size:46px;line-height:1;font-weight:700;letter-spacing:-1px}
+.stat .l{font-size:14px;line-height:1.35;margin-top:6px}
+.bar{display:flex;align-items:center;gap:10px;margin:0 0 8px}
+.bar .lab{width:300px;flex:none;font-size:14px;line-height:1.3}
+.bar .track{flex:1;height:22px;background:#2C2F36;position:relative}
+.bar .fill{position:absolute;inset:0 auto 0 0;background:var(--ink)}
+.bar .fill.g{background:var(--chroma)}
+.bar .v{width:52px;font-weight:700;font-size:16px;text-align:right}
+
+table{width:100%;border-collapse:collapse}
+th,td{border:1px solid #4A4F58;padding:7px 12px;text-align:left;vertical-align:top;font-size:16px;line-height:1.35}
+th{background:var(--chroma);color:var(--dark);border-color:var(--chroma)}
+td.num,th.num{text-align:right;white-space:nowrap}
+
+/* ---------- Portada ---------- */
+.cover{background:var(--dark);color:#fff}
+.cover .bg{position:absolute;inset:0}
+.cover .bg img{width:100%;height:100%;object-fit:cover;object-position:50% 40%}
+.cover .shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(3,3,4,.88) 0%,rgba(3,3,4,.15) 32%,rgba(3,3,4,.2) 52%,rgba(3,3,4,.95) 80%)}
+.cover .letter{position:absolute;left:0;right:0;height:46px;background:#000}
+.cover .masthead{position:absolute;top:66px;left:56px;right:56px;display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid #fff;padding-bottom:10px}
+.cover .masthead .name{font-size:132px;line-height:.85;font-weight:700;letter-spacing:-4px}
+.cover .masthead .ed{font-size:16px;line-height:1.35;text-align:right;padding-bottom:6px}
+.cover .headline{position:absolute;left:56px;right:56px;bottom:132px}
+.cover .headline h1{font-size:50px;line-height:1.05;margin:0 0 14px;letter-spacing:-.5px;font-weight:700;max-width:640px}
+.cover .headline .sub{font-size:24px;font-style:italic;line-height:1.25}
+.cover .chip{display:inline-block;background:var(--chroma);color:var(--dark);font-size:16px;font-weight:700;padding:6px 12px;margin-bottom:18px}
+.cover .by{position:absolute;left:56px;right:56px;bottom:66px;display:flex;justify-content:space-between;font-size:15px;line-height:1.4}
+.cover .vfmark{position:absolute;top:212px;right:56px;font-size:14px;display:flex;gap:8px;align-items:center;text-shadow:0 1px 3px #000}
+.cover .vfmark i{width:10px;height:10px;border-radius:50%;background:var(--rec)}
+
+/* ---------- Impresión / PDF ---------- */
+@media print{
+  @page{size:816px 1056px;margin:0}
+  body{overflow:visible}
+  .toolbar,.hint{display:none}
+  .stage-wrap{display:block;padding:0}
+  .stage{width:auto!important;height:auto!important;perspective:none}
+  .book{position:static;transform:none!important;width:816px;height:auto}
+  .page{position:relative;transform:none!important;box-shadow:none;break-after:page;page-break-after:always}
+  .page::after{display:none}
+}
+@media (prefers-reduced-motion:reduce){.page{transition:none}}
+.ex{display:grid;grid-template-columns:240px minmax(0,1fr);gap:20px;padding:12px 0;border-top:1px solid var(--line)}
+.ex .media{position:relative;height:138px;background:var(--panel);border:1px solid #2C2F36;overflow:hidden}
+.ex .media iframe,.ex .media video{position:absolute;inset:0;width:100%;height:100%;border:0;object-fit:cover;background:#000}
+.ex .ph{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:14px;background:repeating-linear-gradient(-55deg,#16181C 0 14px,#1B1D22 14px 28px)}
+.ex .ph .play{position:absolute;top:50%;left:50%;width:54px;height:54px;margin:-34px 0 0 -27px;border-radius:50%;background:var(--chroma)}
+.ex .ph .play::after{content:"";position:absolute;left:21px;top:16px;border-left:17px solid var(--dark);border-top:11px solid transparent;border-bottom:11px solid transparent}
+.ex .brand{font-size:14pt;font-weight:700;line-height:1.3;margin:0 0 2px}
+.ex .who{font-size:14px;color:var(--slate);margin-bottom:6px}
+.ex p{margin:0 0 6px}
+.ex .nums{display:flex;gap:18px;flex-wrap:wrap;font-size:14px}
+.ex .nums b{color:var(--chroma);font-size:16px}
+a.watch{display:inline-block;margin-top:8px;color:var(--chroma);font-size:14px}
+</style>
+</head>
+<body>
+<main class="reader">
+<div class="stage-wrap"><div class="stage" id="stage"><div class="book" id="book">
+
+<!-- 1. PORTADA -->
+<section class="page cover" aria-label="Portada">
+  <div class="bg"><img src="https://images.unsplash.com/photo-1625690303837-654c9666d2d0?w=1600&q=75&auto=format&fit=crop" alt="Persona grabando con una cámara sobre trípode bajo luz azul y roja"></div>
+  <div class="shade"></div>
+  <div class="letter" style="top:0"></div>
+  <div class="letter" style="bottom:0"></div>
+  <div class="masthead">
+    <div class="name">Escena IA</div>
+    <div class="ed">Edición n.º 1<br>Noviembre de 2026<br>Publicación semestral</div>
+  </div>
+  <div class="vfmark"><i></i>REC 00:00:00:01</div>
+  <div class="headline">
+    <span class="chip">Revista de emprendimiento</span>
+    <h1>Generación de videos con inteligencia artificial para empresas</h1>
+    <div class="sub">La nueva forma de hacer marketing</div>
+    <div style="margin-top:16px;font-size:18px;line-height:1.35;border-left:4px solid var(--chroma);padding-left:12px;max-width:520px">Caso de éxito: Higgsfield, la plataforma de video con IA que superó los US$ 1 000 millones en ingresos anualizados en 18 meses</div>
+  </div>
+  <div class="by">
+    <div>Por Manuel Guillén<br>Universidad Tecnológica de Panamá</div>
+    <div style="text-align:right">Curso de Formación Empresarial<br>Docente: Josefina Camargo</div>
+  </div>
+</section>
+
+<!-- 2. INTRODUCCIÓN -->
+<section class="page" aria-label="Introducción">
+  <div class="pad">
+    <div class="slate"><span class="sc">Escena 1</span><h2>Introducción: cuando el video deja de ser un lujo</h2><span class="stripes" aria-hidden="true"></span></div>
+    <figure class="vf" style="height:270px;margin:0 0 18px">
+      <img src="https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=1400&q=75&auto=format&fit=crop" alt="Línea de tiempo de edición de video en una pantalla oscura">
+      <span class="tc"><i></i>00:00:02:00</span>
+      <figcaption>Lo que antes tomaba semanas de rodaje y edición hoy puede empezar con un guion y una instrucción escrita.</figcaption>
+    </figure>
+    <div class="cols" style="margin-bottom:16px">
+      <p>Hace apenas una década, producir un video publicitario exigía cámaras, locaciones, actores y semanas de posproducción. Hoy, una persona con un guion claro y las herramientas adecuadas puede generar piezas de calidad profesional en cuestión de horas. Esta primera edición de <i>Escena IA</i> explica cómo la generación de videos con inteligencia artificial (IA) está cambiando el marketing de las empresas y por qué representa una oportunidad de emprendimiento para Panamá.</p>
+      <p>El punto de partida es el peso del video: el 91 % de las empresas lo usa como herramienta de marketing en 2026, frente al 61 % de 2016 (G2, 2026). Sobre esa base, la IA se volvió estándar: el 87 % de los profesionales creativos ya la usa para crear video (Artlist, 2026), y la diferencia entre empresas ya no está en quién usa IA, sino en qué tan bien la usa (HubSpot, 2026).</p>
+      <p>Esta revista presenta Escena IA Studio, una agencia de video con IA pensada para pymes panameñas: su misión, su impacto, sus zonas de trabajo, sus tarifas y cómo se evalúa. También advierte sobre los riesgos, como la desconfianza del público ante los videos hechos con IA.</p>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="n">91 %</div><div class="l">de las empresas usa video para hacer marketing (G2, 2026)</div></div>
+      <div class="stat"><div class="n">87 %</div><div class="l">de los creativos usa IA para crear video (Artlist, 2026)</div></div>
+      <div class="stat"><div class="n">≈ 60 %</div><div class="l">de las pymes panameñas con IA ve más productividad (García Armuelles, 2025)</div></div>
+    </div>
+  </div>
+  <div class="folio"><span>Escena IA, edición n.º 1</span><b>2</b></div>
+</section>
+
+<!-- 3. BIOGRAFÍA -->
+<section class="page" aria-label="Biografía">
+  <div class="pad">
+    <div class="slate"><span class="sc">Escena 2</span><h2>Biografía del autor</h2><span class="stripes" aria-hidden="true"></span></div>
+    <div style="display:grid;grid-template-columns:240px minmax(0,1fr);gap:28px;margin-bottom:16px">
+      <figure class="vf" style="height:300px;margin:0">
+        <img src="images/manuel.jpg" alt="Fotografía de Manuel Guillén" style="object-position:50% 30%">
+        <span class="tc"><i></i>00:00:03:00</span>
+      </figure>
+      <div>
+        <h3 style="font-size:30px;line-height:1.1;margin-bottom:4px">Manuel Guillén</h3>
+        <div class="small" style="margin-bottom:12px">Ingeniero de software full-stack con enfoque en IA aplicada</div>
+        <p>Estudiante de la Licenciatura en Ingeniería de Software de la Universidad Tecnológica de Panamá, donde forma parte del Capítulo de Honor. Construye productos digitales de principio a fin, desde la definición del problema hasta su puesta en producción, y combina la parte técnica con el análisis de negocio.</p>
+        <p style="margin:0">Desarrolló esta revista como proyecto final del curso de Formación Empresarial. Eligió este tema porque une sus dos intereses, la inteligencia artificial y el emprendimiento, y porque el video con IA abre a los jóvenes una forma accesible de crear empresa en Panamá.</p>
+      </div>
+    </div>
+    <h3>Trayectoria</h3>
+    <ul style="margin:0 0 14px;padding-left:20px">
+      <li><b>DoctorMind (2025–2026).</b> Cofundador e ingeniero de software e IA de un agente que investiga información médica de fuentes verificadas. Fue de los participantes más jóvenes de la incubadora de startups 2025 de Ciudad del Saber.</li>
+      <li><b>Nebulabs (2023–presente).</b> Desarrollador full-stack de aplicaciones web y móviles para más de 10 clientes en Panamá.</li>
+      <li><b>Proyectos propios.</b> Layolt, plataforma de tarjetas de fidelidad en producción con 5 negocios activos, y Thunderclaw.io, hosting gestionado para agentes de IA vendido como plantilla a 3 clientes.</li>
+      <li><b>Competencias.</b> Puesto 8 entre más de 100 equipos en el Hackathon Copa Reto Linux 2024 y líder de prototipo en el Hackathon ICCA Travel Tech de IEEE y SENACYT.</li>
+    </ul>
+    <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px;border-top:2px solid var(--chroma);padding-top:12px">
+      <div>
+        <h3>Sobre esta revista</h3>
+        <p style="margin-bottom:4px"><b>Lectores:</b> estudiantes universitarios y futuros emprendedores.</p>
+        <p style="margin-bottom:4px"><b>Periodicidad:</b> semestral, revista en línea.</p>
+        <p style="margin:0"><b>Contacto:</b> linkedin.com/in/manuel-guillen-castillo</p>
+      </div>
+      <nav aria-label="Sumario">
+        <h3>Sumario</h3>
+        <ol style="margin:0;padding-left:22px;line-height:1.35" class="toc">
+          <li><a href="#p4" data-go="4">Misión y formación</a>, pág. 4</li>
+          <li><a href="#p5" data-go="5">Comunidad e impacto</a>, pág. 5</li>
+          <li><a href="#p6" data-go="6">Caso Higgsfield</a>, pág. 6</li>
+          <li><a href="#p7" data-go="7">Anuncios hechos con Higgsfield</a>, pág. 7</li>
+          <li><a href="#p8" data-go="8">Zonas, tarifas y evaluación</a>, pág. 8</li>
+          <li><a href="#p9" data-go="9">Conclusión</a>, pág. 9</li>
+          <li><a href="#p10" data-go="10">Anexos</a>, pág. 10</li>
+          <li><a href="#p11" data-go="11">Bibliografía</a>, pág. 11</li>
+        </ol>
+      </nav>
+    </div>
+  </div>
+  <div class="folio"><span>Escena IA, edición n.º 1</span><b>3</b></div>
+</section>
+
+<!-- 4. CONTENIDO 1 -->
+<section class="page" aria-label="Misión, visión y formación del emprendedor">
+  <div class="pad">
+    <div class="slate"><span class="sc">Escena 3</span><h2>Escena IA Studio: propósito y formación del emprendedor</h2><span class="stripes" aria-hidden="true"></span></div>
+    <h3>Misión, visión y función dentro del emprendimiento</h3>
+    <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0;margin-bottom:12px;border:2px solid #4A4F58">
+      <div style="padding:12px 16px;background:var(--panel);color:var(--ink)"><b>Misión.</b> Ayudar a las pymes panameñas a comunicar sus productos con video de calidad profesional, hecho con IA en una fracción del tiempo y del costo tradicionales, sin perder la voz humana de cada marca.</div>
+      <div style="padding:12px 16px"><b>Visión.</b> Ser, hacia 2030, la agencia de video con IA de referencia para las pymes de Centroamérica, reconocida por su creatividad, su ética y sus resultados medibles.</div>
+    </div>
+    <p>La agencia funciona como puente entre la idea del cliente y el video terminado. La IA acelera la ideación y la producción: el 63 % de los mercadólogos la considera útil para generar ideas de video y el 55 %, para ahorrar tiempo de edición (Animoto, 2026). Pero un clip generado es solo un punto de partida que todavía necesita recorte, subtítulos y la identidad de la marca (Goh, 2026).</p>
+    <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;margin:2px 0 16px;border-top:4px solid var(--chroma)">
+      <div style="padding:8px 10px 0 0"><b>1. Brief.</b><div class="small">Objetivo y público con el cliente.</div></div>
+      <div style="padding:8px 10px 0;border-left:1px solid var(--line)"><b>2. Guion.</b><div class="small">Historia y storyboard.</div></div>
+      <div style="padding:8px 10px 0;border-left:1px solid var(--line)"><b>3. Generación.</b><div class="small">Clips, voz y música con IA.</div></div>
+      <div style="padding:8px 0 0 10px;border-left:1px solid var(--line)"><b>4. Revisión.</b><div class="small">Edición humana y entrega.</div></div>
+    </div>
+    <figure class="vf" style="height:170px;margin:0 0 16px">
+      <img src="https://images.unsplash.com/photo-1757845524683-611470b2d7ce?w=1400&q=75&auto=format&fit=crop" alt="Estación de trabajo de cineasta con cámaras, lentes y monitores">
+      <span class="tc"><i></i>00:00:04:00</span>
+    </figure>
+    <h3>Importancia en la formación del emprendedor</h3>
+    <p>Para un estudiante, esta industria es una entrada accesible al emprendimiento: el costo de arrancar se desplaza del equipo y las locaciones hacia el talento creativo. El perfil combina redactar instrucciones (<i>prompts</i>) para video, imagen y voz con dirección creativa y visión de marca; pesa más desarrollar conceptos que dominar la técnica (Artlist, 2026). También exige aprender a medir:</p>
+    <div class="bar"><span class="lab">Usan IA generativa para producir imagen o video</span><span class="track"><span class="fill" style="width:73%"></span></span><span class="v">73 %</span></div>
+    <div class="bar"><span class="lab">La usan para probar y optimizar</span><span class="track"><span class="fill g" style="width:41%"></span></span><span class="v">41 %</span></div>
+    <div class="small">Mercadólogos encuestados por WARC y TikTok (eMarketer, s. f.).</div>
+  </div>
+  <div class="folio"><span>Escena IA, edición n.º 1</span><b>4</b></div>
+</section>
+
+<!-- 5. CONTENIDO 2 -->
+<section class="page" aria-label="Comunidad empresarial e impacto">
+  <div class="pad">
+    <div class="slate"><span class="sc">Escena 4</span><h2>La comunidad empresarial y el impacto en la sociedad</h2><span class="stripes" aria-hidden="true"></span></div>
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:24px;margin-bottom:6px">
+      <p>En Panamá la adopción ya está en marcha. Cerca del 60 % de las pymes que usan IA reportan más productividad y, según BCG, el 72 % de los empleados del país la usa con regularidad, aunque solo el 13 % dice tener agentes de IA plenamente integrados en sus procesos (García Armuelles, 2025). Una encuesta a líderes de marketing muestra además un 80 % de optimismo frente a la IA y ubica la generación de video entre sus prioridades (Panamá América, 2025).</p>
+      <figure class="vf" style="height:200px;margin:0">
+        <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=900&q=75&auto=format&fit=crop" alt="Equipo de trabajo reunido frente a computadoras portátiles">
+        <span class="tc"><i></i>00:00:05:00</span>
+      </figure>
+    </div>
+    <div style="background:var(--panel);color:var(--ink);padding:16px 20px;margin-bottom:16px">
+      <h3 style="color:var(--chroma)">Caso Coca-Cola: Navidad de 2025</h3>
+      <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:6px 0 10px">
+        <div><div style="font-size:34px;font-weight:700;line-height:1">≈ 100</div><div style="font-size:14px;line-height:1.3;margin-top:4px">profesionales participaron</div></div>
+        <div><div style="font-size:34px;font-weight:700;line-height:1">5</div><div style="font-size:14px;line-height:1.3;margin-top:4px">especialistas en IA crearon el material base</div></div>
+        <div><div style="font-size:34px;font-weight:700;line-height:1">70 000</div><div style="font-size:14px;line-height:1.3;margin-top:4px">clips de video generados</div></div>
+        <div><div style="font-size:34px;font-weight:700;line-height:1">140+</div><div style="font-size:14px;line-height:1.3;margin-top:4px">países donde se emitiría</div></div>
+      </div>
+      <p style="margin:0">La producción habría pasado de casi un año a cerca de un mes, según The Wall Street Journal, citado por Merca2.0. Aun así, parte del público sintió que el anuncio carecía de alma (Sánchez Dimas, 2025).</p>
+    </div>
+    <h3>¿Confía el público en los videos hechos con IA?</h3>
+    <div class="bar"><span class="lab">Ha visto un video que sospechó hecho con IA</span><span class="track"><span class="fill" style="width:83%"></span></span><span class="v">83 %</span></div>
+    <div class="bar"><span class="lab">Valora más que el video sea personal y auténtico</span><span class="track"><span class="fill g" style="width:43%"></span></span><span class="v">43 %</span></div>
+    <div class="bar"><span class="lab">Cree que un video con IA bajaría su opinión de la marca</span><span class="track"><span class="fill" style="width:36%"></span></span><span class="v">36 %</span></div>
+    <div class="small" style="margin-bottom:12px">Encuesta de Animoto (2026) a más de 450 consumidores y mercadólogos de EE. UU.; mide sospecha, no detección comprobada.</div>
+    <p>La lección es doble. Ahorrar tiempo y costos no garantiza conexión emocional: el público rechaza la frialdad más que a la IA en sí (Sánchez Dimas, 2025). Además, los especialistas advierten riesgos de marca, de propiedad intelectual y de empleo, y recuerdan que la supervisión humana sigue siendo clave (Nicoud, 2024). Para la sociedad, el reto es usar la IA con transparencia y sin desplazar el talento creativo local.</p>
+  </div>
+  <div class="folio"><span>Escena IA, edición n.º 1</span><b>5</b></div>
+</section>
+
+<!-- 6. CASO HIGGSFIELD -->
+<section class="page" aria-label="Caso de éxito: Higgsfield">
+  <div class="pad">
+    <div class="slate"><span class="sc">Escena 5</span><h2>Caso de éxito internacional: Higgsfield</h2><span class="stripes" aria-hidden="true"></span></div>
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) 220px;gap:22px;margin-bottom:12px">
+      <div>
+        <p>Higgsfield demuestra que el video con IA ya es un gran negocio. La fundaron en 2023 Alex Mashrabov y Yerzat Dulat; Mashrabov había dirigido la IA generativa de Snap, empresa que compró su startup anterior, AI Factory (TechCrunch, 2026). Su plataforma web salió en marzo de 2025 (Dealroom, 2026a).</p>
+        <p style="margin:0">Su primer intento fue una app móvil para consumidores que llegó al millón de usuarios en dos meses, pero no lograba retenerlos (Asplund, s. f.). El equipo entendió que los creativos profesionales producen video en computadora y cambió de rumbo hacia ellos (Dealroom, 2026b).</p>
+      </div>
+      <figure class="vf" style="height:270px;margin:0">
+        <img src="https://images.unsplash.com/photo-1768222935380-0a3a76fbb42e?w=900&q=75&auto=format&fit=crop" alt="Estudio de producción de video con un monitor que muestra varias pantallas">
+        <span class="tc"><i></i>00:00:06:00</span>
+      </figure>
+    </div>
+    <h3>Ingresos anualizados, en millones de US$</h3>
+    <div class="bar"><span class="lab" style="width:120px">Enero de 2026</span><span class="track"><span class="fill" style="width:20%"></span></span><span class="v" style="width:70px">200</span></div>
+    <div class="bar"><span class="lab" style="width:120px">Agosto de 2026</span><span class="track"><span class="fill" style="width:70%"></span></span><span class="v" style="width:70px">700</span></div>
+    <div class="bar"><span class="lab" style="width:120px">Septiembre de 2026</span><span class="track"><span class="fill g" style="width:100%"></span></span><span class="v" style="width:70px">1 000</span></div>
+    <div class="small" style="margin-bottom:12px">Fuentes: TechCrunch (2026), Higgsfield (2026a) y Dealroom (2026a). Son proyecciones del ritmo de ventas, no ingresos auditados (The Next Web, 2026).</div>
+    <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:2px solid var(--chroma);border-bottom:2px solid #4A4F58;margin-bottom:14px">
+      <div style="padding:10px 10px 10px 0"><div style="font-size:30px;font-weight:700;line-height:1;color:var(--chroma);white-space:nowrap;letter-spacing:-1px">5 400 M</div><div style="font-size:14px;line-height:1.3;margin-top:5px">dólares de valoración tras levantar US$ 400 M</div></div>
+      <div style="padding:10px;border-left:1px solid var(--line)"><div style="font-size:30px;font-weight:700;line-height:1;color:var(--chroma)">30 M+</div><div style="font-size:14px;line-height:1.3;margin-top:5px">usuarios en 238 países y territorios</div></div>
+      <div style="padding:10px;border-left:1px solid var(--line)"><div style="font-size:30px;font-weight:700;line-height:1;color:var(--chroma)">390</div><div style="font-size:14px;line-height:1.3;margin-top:5px">empresas de la lista Fortune 500 la usan</div></div>
+      <div style="padding:10px 0 10px 10px;border-left:1px solid var(--line)"><div style="font-size:30px;font-weight:700;line-height:1;color:var(--chroma)">42×</div><div style="font-size:14px;line-height:1.3;margin-top:5px">creció el uso de sus agentes en tres meses</div></div>
+    </div>
+    <h3>Lecciones para Escena IA Studio</h3>
+    <p>Su caso deja tres ideas útiles para una pyme panameña: enfocarse en clientes profesionales que pagan por resultados, cambiar de rumbo cuando los datos lo piden y vender capacidad de producción además de suscripciones. De hecho, el peso de las suscripciones en sus ingresos bajó de más del 90 % a poco más del 60 % (Sacra, 2026). Su director también sostiene que, aunque la IA cambia los trabajos creativos, el buen gusto y las buenas ideas siguen siendo lo principal (Web Summit, 2026).</p>
+    <p style="margin:0">No todo fue positivo: parte de su crecimiento se apoyó en un marketing agresivo con influencers que en algunos casos salió mal (YourStory, 2026). Crecer rápido no exime de cuidar la reputación.</p>
+  </div>
+  <div class="folio"><span>Escena IA, edición n.º 1</span><b>6</b></div>
+</section>
+
+<!-- 7. EJEMPLOS HIGGSFIELD -->
+<section class="page" aria-label="Ejemplos de anuncios hechos con Higgsfield">
+  <div class="pad">
+    <div class="slate"><span class="sc">Escena 6</span><h2>Tres anuncios reales hechos con Higgsfield</h2><span class="stripes" aria-hidden="true"></span></div>
+    <p>El patrón se repite: equipos pequeños que producen piezas de marca en horas o días, no en meses. Las cifras las reportan las propias marcas o Higgsfield, por lo que conviene leerlas como testimonios, no como estudios independientes.</p>
+
+    <article class="ex">
+      <div class="media"><video src="videos/maradona.mp4" poster="videos/maradona.jpg" controls playsinline preload="none" aria-label="Video de la campaña Maradona Official hecho con Higgsfield"></video></div>
+      <div>
+        <div class="brand">Maradona Official</div>
+        <div class="who">Estudio One of One · moda deportiva</div>
+        <p>El estudio creó con Higgsfield todo el mundo visual de la primera marca oficial de ropa de Maradona, lanzada alrededor del Mundial: fotos de producto, películas de campaña y piezas para redes, sin viajar a rodar a Buenos Aires ni a Nápoles (Higgsfield, 2026b).</p>
+        <div class="nums"><span><b>3 semanas</b> para agotar la primera colección</span><span><b>10 M+</b> personas alcanzadas</span></div>
+      </div>
+    </article>
+
+    <article class="ex">
+      <div class="media"><video src="videos/alya.mp4" poster="videos/alya.jpg" controls playsinline preload="none" style="object-position:50% 25%" aria-label="Anuncio de Alya Health hecho con Higgsfield"></video></div>
+      <div>
+        <div class="brand">Alya Health</div>
+        <div class="who">Pequeña marca de bienestar · aceite de oliva</div>
+        <p>Su fundadora produce anuncios de video tipo testimonio y piezas de campaña sin contratar creadores externos. Cada video le toma unas dos horas, frente a cerca de una semana que antes tardaba en contratar y coordinar a un creador (Higgsfield, 2026c).</p>
+        <div class="nums"><span><b>≈ 2 horas</b> por video</span><span><b>hasta 95 %</b> más rápido</span><span><b>US$ 500–1 000</b> de ahorro al mes</span></div>
+      </div>
+    </article>
+
+    <article class="ex" style="border-bottom:1px solid var(--line)">
+      <div class="media"><iframe src="https://www.youtube-nocookie.com/embed/jkSTcUb9DMo" title="Anuncio Put AI to Work de Vendasta, hecho con Higgsfield" loading="lazy" allow="encrypted-media; picture-in-picture" allowfullscreen></iframe></div>
+      <div>
+        <div class="brand">Vendasta, «Put AI to Work»</div>
+        <div class="who">Empresa de software · comercial estilo Super Bowl</div>
+        <p>Tres personas hicieron un comercial completo en cinco días usando solo IA, con unos US$ 200 en créditos de Higgsfield. No salió al aire en el Super Bowl, cuyo espacio publicitario superaba los US$ 8 millones (Behiel, 2026).</p>
+        <div class="nums"><span><b>3</b> personas</span><span><b>5</b> días</span><span><b>≈ US$ 200</b> en créditos</span></div>
+      </div>
+    </article>
+
+    <p style="margin-top:14px"><b>¿Y Coca-Cola?</b> Su anuncio navideño hecho con IA no se produjo con Higgsfield, sino con estudios especializados como Secret Level (Nicoud, 2024). Para una pyme panameña, los casos de Alya y Vendasta son más cercanos: muestran lo que un equipo de una a tres personas puede lograr.</p>
+  </div>
+  <div class="folio"><span>Escena IA, edición n.º 1</span><b>7</b></div>
+</section>
+
+<!-- 6. CONTENIDO 3 -->
+<section class="page" aria-label="Zonificación, tarifas y evaluación">
+  <div class="pad">
+    <div class="slate"><span class="sc">Escena 7</span><h2>Zonificación de actividades, tarifas y evaluación</h2><span class="stripes" aria-hidden="true"></span></div>
+    <figure class="vf" style="height:150px;margin:0 0 14px">
+      <img src="https://images.unsplash.com/photo-1528109966604-5a6a4a964e8d?w=1400&q=75&auto=format&fit=crop" alt="Persona editando en una computadora portátil">
+      <span class="tc"><i></i>00:00:08:00</span>
+    </figure>
+    <h3>Zonificación de las actividades del servicio</h3>
+    <p style="margin-bottom:10px">El servicio se organiza en cuatro zonas de trabajo. El mercado inicial son las pymes de comercio, gastronomía, turismo y educación de la ciudad de Panamá, con expansión posterior a otras provincias.</p>
+    <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:16px">
+      <div style="border:2px solid #4A4F58;padding:10px 14px"><b>Zona 1. Estrategia y guion</b><div>Objetivo, público, guion y storyboard.</div></div>
+      <div style="border:2px solid #4A4F58;padding:10px 14px"><b>Zona 2. Producción con IA</b><div>Clips, avatares, voces y música.</div></div>
+      <div style="border:2px solid #4A4F58;padding:10px 14px"><b>Zona 3. Posproducción y marca</b><div>Edición, subtítulos, logotipo y formatos.</div></div>
+      <div style="border:2px solid #4A4F58;padding:10px 14px;background:var(--chroma);color:var(--dark)"><b>Zona 4. Distribución y medición</b><div>Publicación, pruebas y reporte de resultados.</div></div>
+    </div>
+    <h3>Tarifas de lanzamiento (propuesta)</h3>
+    <table style="margin-bottom:4px">
+      <thead><tr><th style="width:130px">Paquete</th><th>Incluye</th><th class="num" style="width:110px">Tarifa</th></tr></thead>
+      <tbody>
+        <tr><td><b>Inicio</b></td><td>3 videos cortos (15 a 30 s) con subtítulos y una revisión.</td><td class="num">B/. 250</td></tr>
+        <tr><td><b>Crecimiento</b></td><td>8 videos cortos y un spot de 45 s, con guion y dos revisiones.</td><td class="num">B/. 650</td></tr>
+        <tr><td><b>Marca</b></td><td>15 videos, avatar multilingüe, guion y reporte de resultados.</td><td class="num">B/. 1,200</td></tr>
+      </tbody>
+    </table>
+    <div class="small" style="margin-bottom:14px">Tarifas estimadas por el autor; deben validarse con costos reales y clientes piloto. Herramientas: ver anexo A.</div>
+    <h3>Evaluación del proyecto</h3>
+    <p style="margin-bottom:8px">Como muchos equipos producen con IA pero pocos miden (eMarketer, s. f.), el emprendimiento se evaluará con cuatro indicadores:</p>
+    <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:2px solid var(--chroma);border-bottom:2px solid #4A4F58">
+      <div style="padding:8px 10px 8px 0"><b>Eficiencia</b><div class="small">Costo y tiempo por video.</div></div>
+      <div style="padding:8px 10px;border-left:1px solid var(--line)"><b>Alcance</b><div class="small">Vistas y retención.</div></div>
+      <div style="padding:8px 10px;border-left:1px solid var(--line)"><b>Satisfacción</b><div class="small">Calificación y recompra.</div></div>
+      <div style="padding:8px 0 8px 10px;border-left:1px solid var(--line)"><b>Retorno</b><div class="small">Ventas o contactos del cliente.</div></div>
+    </div>
+  </div>
+  <div class="folio"><span>Escena IA, edición n.º 1</span><b>8</b></div>
+</section>
+
+<!-- 7. CONCLUSIÓN -->
+<section class="page" aria-label="Conclusión">
+  <div class="pad">
+    <div class="slate"><span class="sc">Escena 8</span><h2>Conclusión: la idea importa más que la herramienta</h2><span class="stripes" aria-hidden="true"></span></div>
+    <figure class="vf" style="height:250px;margin:0 0 18px">
+      <img src="https://images.unsplash.com/photo-1680783954745-3249be59e527?w=1400&q=75&auto=format&fit=crop" alt="Mano robótica y mano humana acercándose">
+      <span class="tc"><i></i>00:00:09:00</span>
+    </figure>
+    <div class="cols">
+      <p>La generación de videos con IA ya no es una promesa: el video es la herramienta de marketing de casi todas las empresas y la IA forma parte del trabajo de la mayoría de los creativos (G2, 2026; Artlist, 2026). Como la IA es ahora la base y no el diferenciador, la ventaja está en la calidad de la idea, del criterio y de la ejecución (HubSpot, 2026).</p>
+      <p>Para Panamá la oportunidad es concreta. Las pymes ya perciben mejoras de productividad con IA, pero su uso para construir marca todavía es limitado (García Armuelles, 2025). Eso deja espacio a una agencia como Escena IA Studio, que ofrezca video accesible con supervisión humana, la mejor respuesta a un público que sospecha de la IA y valora la autenticidad (Animoto, 2026).</p>
+      <p>En lo formativo, el proyecto muestra que emprender hoy exige combinar creatividad, dirección y medición. El caso Higgsfield confirma que el mercado premia a quien resuelve un problema profesional concreto (Dealroom, 2026a). La misión, las zonas, las tarifas y los indicadores de esta edición son un punto de partida que debe validarse con clientes reales.</p>
+    </div>
+    <div style="margin-top:auto;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px">
+      <div style="background:var(--panel);color:var(--ink);padding:14px 16px"><b>La idea pesa más que la herramienta.</b><div style="font-size:14px;line-height:1.4;margin-top:4px">Gana quien tiene criterio creativo, no solo una suscripción.</div></div>
+      <div style="background:var(--chroma);color:var(--dark);padding:14px 16px"><b>Siempre un humano en el proceso.</b><div style="font-size:14px;line-height:1.4;margin-top:4px">Revisar y dar voz de marca protege la confianza.</div></div>
+      <div style="border:2px solid #4A4F58;padding:12px 14px"><b>Medir para mejorar.</b><div style="font-size:14px;line-height:1.4;margin-top:4px">Producir más rápido no demuestra resultados por sí solo.</div></div>
+    </div>
+  </div>
+  <div class="folio"><span>Escena IA, edición n.º 1</span><b>9</b></div>
+</section>
+
+<!-- 8. ANEXOS -->
+<section class="page" aria-label="Anexos">
+  <div class="pad">
+    <div class="slate"><span class="sc">Escena 9</span><h2>Anexos</h2><span class="stripes" aria-hidden="true"></span></div>
+    <h3>Anexo A. Herramientas de IA según su función</h3>
+    <table style="margin-bottom:4px">
+      <thead><tr><th style="width:240px">Función</th><th>Herramientas</th></tr></thead>
+      <tbody>
+        <tr><td>Guiones y textos</td><td>ChatGPT</td></tr>
+        <tr><td>Generación de video</td><td>Runway Gen-4, Pika</td></tr>
+        <tr><td>Clips cinematográficos</td><td>Veo 3 (Google)</td></tr>
+        <tr><td>Videos con avatares</td><td>Synthesia, HeyGen</td></tr>
+        <tr><td>Imágenes</td><td>Midjourney, DALL·E</td></tr>
+        <tr><td>Locución y voces</td><td>ElevenLabs</td></tr>
+        <tr><td>Plataforma todo en uno</td><td>Higgsfield</td></tr>
+      </tbody>
+    </table>
+    <div class="small" style="margin-bottom:14px">Fuentes: WebFX (s. f.) e Higgsfield (2026a). Verificar versiones y licencias de uso comercial.</div>
+    <h3>Anexo B. Marcas que ya hacen video publicitario con IA</h3>
+    <p style="margin-bottom:2px">Coca-Cola, Heinz, Nike, Cadbury, Motorola, Virgin Voyages y Toys R Us.</p>
+    <div class="small" style="margin-bottom:14px">Fuente: Kapwing (s. f.).</div>
+    <h3>Anexo C. Buenas prácticas para un video con IA</h3>
+    <ol style="margin:0 0 14px;padding-left:22px">
+      <li>Tratar el clip generado como borrador: recortar, subtitular y aplicar la marca (Goh, 2026).</li>
+      <li>Mantener supervisión humana en las campañas importantes (Nicoud, 2024).</li>
+      <li>Cuidar la autenticidad y el tono emocional del mensaje (Animoto, 2026).</li>
+      <li>Medir resultados y probar variantes, no solo producir (eMarketer, s. f.).</li>
+    </ol>
+    <h3>Anexo D. Glosario</h3>
+    <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 28px">
+      <p style="margin:0"><b>IA generativa:</b> sistemas que crean texto, imagen, audio o video a partir de instrucciones.</p>
+      <p style="margin:0"><b>Texto a video:</b> generar clips describiendo la escena por escrito.</p>
+      <p style="margin:0"><b>Prompt:</b> instrucción escrita que se le da a la herramienta de IA.</p>
+      <p style="margin:0"><b>Avatar de IA:</b> presentador digital con voz y guion definidos.</p>
+      <p style="margin:0"><b>Posproducción:</b> edición, subtítulos y ajustes finales.</p>
+      <p style="margin:0"><b>KPI:</b> indicador clave que mide los resultados de un proyecto.</p>
+    </div>
+  </div>
+  <div class="folio"><span>Escena IA, edición n.º 1</span><b>10</b></div>
+</section>
+
+<!-- BIBLIOGRAFÍA -->
+<section class="page" aria-label="Bibliografía">
+  <div class="pad">
+    <div class="slate"><span class="sc">Escena 10</span><h2>Bibliografía</h2><span class="stripes" aria-hidden="true"></span></div>
+    <div class="refs" style="font-size:16px;line-height:1.5">
+      <p class="r">Animoto. (2026, 22 de enero). <i>83% of consumers can spot AI videos, 36% say it hurts brand trust: New Animoto report</i> [Comunicado de prensa]. Adweek Wire. https://www.adweek.com/adweek-wire/83-of-consumers-can-spot-ai-videos-36-say-it-hurts-brand-trust-new-animoto-report/</p>
+      <p class="r">Artlist. (2026). <i>5 AI video trends for brands and creators in 2026</i>. https://artlist.io/blog/artlist-creative-trend-report-2026/</p>
+      <p class="r">Asplund, J.-E. (s. f.). <i>Alex Mashrabov, CEO of Higgsfield, on orchestrating AI video models</i>. Sacra. https://sacra.com/research/alex-mashrabov-higgsfield-ai-video-production/</p>
+      <p class="r">Behiel, N. (2026, 9 de febrero). <i>Super Bowl commercials 2026: Best ads, weirdest moments, and the $200 AI commercial we made instead</i>. Vendasta. https://www.vendasta.com/blog/super-bowl-commercials-2026/</p>
+      <p class="r">Dealroom. (2026a). <i>Higgsfield hits $1B in revenue 18 months after launch, draws Iman Gadzhi stake</i>. https://dealroom.co/news/160896-higgsfield-hits-1b-in-revenue-18-months-after-launch-draws-iman-gadzhi-s/</p>
+      <p class="r">Dealroom. (2026b, 23 de junio). <i>How Higgsfield scaled to a $400M run rate in 13 months</i>. https://dealroom.co/news/135584-how-higgsfield-scaled-to-a-400m-run-rate-in-13-months/</p>
+      <p class="r">eMarketer. (s. f.). <i>Marketers use gen AI to make creative, not to test it</i>. https://www.emarketer.com/content/marketers-use-gen-ai-make-creative--not-test</p>
+      <p class="r">G2. (2026). <i>Video marketing statistics</i>. https://www.g2.com/articles/video-marketing-statistics</p>
+      <p class="r">García Armuelles, L. (2025, 8 de septiembre). El 60% de pymes en Panamá ven aumento de productividad con el uso de IA. <i>La Estrella de Panamá</i>. https://www.laestrella.com.pa/economia/el-60-de-pymes-en-panama-ven-aumento-de-productividad-con-el-uso-de-ia-MI15840419</p>
+      <p class="r">Goh, A. C. (2026, 15 de septiembre). <i>Video marketing statistics 2026: What 91% adoption actually means for small teams</i>. Piktochart. https://piktochart.com/blog/video-marketing-statistics-2026/</p>
+      <p class="r">Higgsfield. (2026a, 17 de agosto). <i>Higgsfield raises $400 million Series B financing at $5.4 billion valuation with annualized revenue reaching $700 million</i> [Comunicado de prensa]. Intel Capital. https://www.intelcapital.com/?p=12435</p>
+      <p class="r">Higgsfield. (2026b, 14 de julio). <i>One of One studio interview</i> [Caso de estudio]. https://higgsfield.ai/creator-hub/case-studies/one-of-one-studio-interview</p>
+      <p class="r">Higgsfield. (2026c, 7 de noviembre). <i>Video ads in just 2 hours with Higgsfield MCP: Alya Health shares their insights</i> [Caso de estudio]. https://higgsfield.ai/creator-hub/case-studies/video-ads-in-just-2-hours-with-higgsfield-mcp-alya-health-shares-their-insights</p>
+    </div>
+  </div>
+  <div class="folio"><span>Escena IA, edición n.º 1</span><b>11</b></div>
+</section>
+
+<section class="page" aria-label="Bibliografía (continuación)">
+  <div class="pad">
+    <div class="slate"><span class="sc">Escena 10</span><h2>Bibliografía (continuación)</h2><span class="stripes" aria-hidden="true"></span></div>
+    <div class="refs" style="font-size:16px;line-height:1.5">
+      <p class="r">HubSpot. (2026). <i>The 2026 state of marketing report</i>. https://www.hubspot.com/stateofmarketing</p>
+      <p class="r">Kapwing. (s. f.). <i>11 brands making video ads with AI (it’s not just Coca-Cola)</i>. https://www.kapwing.com/resources/11-brands-making-video-ads-with-ai-its-not-just-coca-cola/</p>
+      <p class="r">Nicoud, A. (2024, 23 de diciembre). Will 2025 be the year of AI-generated advertising? <i>IBM Think</i>. https://www.ibm.com/think/news/ai-generated-advertising-2025</p>
+      <p class="r">Panamá América. (2025, 3 de junio). <i>Un 80 % de los gerentes de "marketing" se muestra optimista frente a la IA</i>. https://www.panamaamerica.com.pa/tecnologia/un-80-de-los-gerentes-de-marketing-se-muestra-optimista-frente-la-ia-1249728</p>
+      <p class="r">Sacra. (2026). <i>Higgsfield</i>. https://sacra.com/c/higgsfield/</p>
+      <p class="r">Sánchez Dimas, J. (2025, 5 de noviembre). El caso Coca-Cola y las lecciones que deja el auge de la publicidad hecha con IA. <i>Merca2.0</i>. https://www.merca20.com/?p=12531406</p>
+      <p class="r">TechCrunch. (2026, 15 de enero). <i>AI video startup Higgsfield, founded by ex-Snap exec, lands $1.3B valuation</i>. https://techcrunch.com/2026/01/15/ai-video-startup-higgsfield-founded-by-ex-snap-exec-lands-1-3b-valuation</p>
+      <p class="r">The Next Web. (2026). <i>Higgsfield raised $400mn at $5.4bn, four times its January valuation</i>. https://thenextweb.com/news/higgsfield-series-b-400m-5-4bn-valuation-700m-revenue</p>
+      <p class="r">Web Summit. (2026). <i>Accelerating creativity with AI</i>. https://qatar.websummit.com/summaries/qat26/accelerating-creativity-with-ai/</p>
+      <p class="r">WebFX. (s. f.). <i>AI-generated ad examples</i>. https://www.webfx.com/blog/ppc/ai-generated-ad-examples</p>
+      <p class="r">YourStory. (2026). <i>How Higgsfield AI became a $5.4 billion AI video startup</i>. https://yourstory.com/ai-story/how-higgsfield-ai-became-a-54-billion-ai-video-startup</p>
+    </div>
+    <div class="small" style="margin-top:auto">Fotografías: Unsplash (licencia Unsplash, uso libre). Fotografía del autor: Manuel Guillén. Referencias en formato APA, 7.ª edición.</div>
+  </div>
+  <div class="folio"><span>Escena IA, edición n.º 1</span><b>12</b></div>
+</section>
+
+<!-- 10. CONTRAPORTADA -->
+<section class="page cover" aria-label="Contraportada">
+  <div class="bg"><img src="https://images.unsplash.com/photo-1485846234645-a62644f84728?w=1600&q=75&auto=format&fit=crop" alt="Claqueta de cine en una carretera"></div>
+  <div class="shade" style="background:rgba(3,3,4,.72)"></div>
+  <div class="letter" style="top:0"></div>
+  <div class="letter" style="bottom:0"></div>
+  <div style="position:absolute;left:56px;right:56px;top:50%;transform:translateY(-50%)">
+    <div style="font-size:96px;line-height:.9;font-weight:700;letter-spacing:-3px;margin-bottom:20px">Corte.</div>
+    <p style="font-size:24px;line-height:1.35;text-align:left;max-width:560px;margin:0 0 28px">La IA produce más rápido. La confianza en una marca todavía se construye con personas.</p>
+    <span class="chip">Próxima edición: mayo de 2027</span>
+    <p style="font-size:16px;text-align:left;margin:12px 0 0;max-width:520px">Resultados de un piloto con pymes panameñas y ajustes al modelo de tarifas.</p>
+  </div>
+  <div class="by"><div>Escena IA, edición n.º 1, noviembre de 2026</div><div style="text-align:right">Manuel Guillén<br>Universidad Tecnológica de Panamá</div></div>
+</section>
+
+</div></div></div>
+
+<nav class="toolbar" aria-label="Navegación de la revista">
+  <button id="prev" type="button">Página anterior</button>
+  <div class="counter" aria-live="polite"><span class="rec" aria-hidden="true"></span><span id="count">1 de 13</span></div>
+  <button id="next" type="button">Página siguiente</button>
+  <label class="sr" style="position:absolute;left:-9999px" for="jump">Ir a la sección</label>
+  <select id="jump">
+    <option value="1">Portada</option><option value="2">Introducción</option><option value="3">Biografía</option>
+    <option value="4">Misión y formación</option><option value="5">Comunidad e impacto</option><option value="6">Caso Higgsfield</option>
+    <option value="7">Anuncios con Higgsfield</option><option value="8">Zonas y tarifas</option><option value="9">Conclusión</option><option value="10">Anexos</option><option value="11">Bibliografía</option><option value="13">Contraportada</option>
+  </select>
+</nav>
+<div class="hint">Usa las flechas del teclado o desliza el dedo para pasar las páginas.</div>
+</main>
+
+<style>.r{padding-left:36px;text-indent:-36px;text-align:left;margin:0 0 8px;word-break:break-word}.toc a{color:var(--chroma)}</style>
+<script>
+(function(){
+  var pages=[].slice.call(document.querySelectorAll('.page'));
+  var N=pages.length, cur=0;
+  var stage=document.getElementById('stage'), book=document.getElementById('book');
+  var prev=document.getElementById('prev'), next=document.getElementById('next');
+  var count=document.getElementById('count'), jump=document.getElementById('jump');
+
+  function render(){
+    pages.forEach(function(p,i){
+      p.style.zIndex=N-i;
+      p.classList.toggle('turned',i<cur);
+      var hidden=i!==cur;
+      p.setAttribute('aria-hidden',hidden);
+      if('inert' in p) p.inert=hidden;
+      if(hidden) p.querySelectorAll('video').forEach(function(v){v.pause()});
+    });
+    count.textContent=(cur+1)+' de '+N;
+    prev.disabled=cur===0; next.disabled=cur===N-1;
+    jump.value=String(cur+1);
+    if(history.replaceState) history.replaceState(null,'','#p'+(cur+1));
+  }
+  function go(i){cur=Math.max(0,Math.min(N-1,i));render();}
+  function fit(){
+    var bar=document.querySelector('.toolbar').offsetHeight+document.querySelector('.hint').offsetHeight;
+    var w=window.innerWidth-32, h=window.innerHeight-bar-28;
+    var s=Math.min(w/816,h/1056,1.25);
+    stage.style.width=(816*s)+'px'; stage.style.height=(1056*s)+'px';
+    book.style.transform='scale('+s+')';
+  }
+  prev.addEventListener('click',function(){go(cur-1)});
+  next.addEventListener('click',function(){go(cur+1)});
+  jump.addEventListener('change',function(){go(parseInt(jump.value,10)-1)});
+  document.addEventListener('keydown',function(e){
+    if(e.target===jump) return;
+    if(e.key==='ArrowRight'||e.key==='PageDown'){go(cur+1);e.preventDefault();}
+    if(e.key==='ArrowLeft'||e.key==='PageUp'){go(cur-1);e.preventDefault();}
+  });
+  document.querySelectorAll('[data-go]').forEach(function(a){
+    a.addEventListener('click',function(e){e.preventDefault();go(parseInt(a.getAttribute('data-go'),10)-1);});
+  });
+  var x0=null;
+  stage.addEventListener('touchstart',function(e){x0=e.touches[0].clientX},{passive:true});
+  stage.addEventListener('touchend',function(e){
+    if(x0===null) return; var dx=e.changedTouches[0].clientX-x0; x0=null;
+    if(Math.abs(dx)>50) go(dx<0?cur+1:cur-1);
+  });
+  window.addEventListener('resize',fit);
+  var m=/#p(\d+)/.exec(location.hash); if(m) cur=Math.max(0,Math.min(N-1,parseInt(m[1],10)-1));
+  fit(); render();
+})();
+</script>
+</body>
+</html>
