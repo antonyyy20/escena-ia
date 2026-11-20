@@ -17,13 +17,22 @@ body{-webkit-print-color-adjust:exact;print-color-adjust:exact;background:var(--
 /* ---------- Lector ---------- */
 .reader{height:100%;display:flex;flex-direction:column;align-items:center}
 .stage-wrap{flex:1;width:100%;display:flex;align-items:center;justify-content:center;padding:16px 16px 8px;min-height:0}
-.stage{position:relative;perspective:2600px}
-.book{position:absolute;top:0;left:0;width:816px;height:1056px;transform-origin:0 0}
+.stage{position:relative}
+.stage.single{overflow:hidden}
+.book{position:absolute;top:0;left:0;width:1632px;height:1056px;transform-origin:0 0;perspective:3400px;transition:transform .9s cubic-bezier(.45,.05,.2,1)}
+.leaf{position:absolute;top:0;left:816px;width:816px;height:1056px;transform-origin:left center;transform-style:preserve-3d;transition:transform .9s cubic-bezier(.45,.05,.2,1)}
+.leaf.flipped{transform:rotateY(-180deg)}
 .page{position:absolute;inset:0;width:816px;height:1056px;overflow:hidden;background:var(--paper);
-  transform-origin:left center;transition:transform .9s cubic-bezier(.45,.05,.2,1),box-shadow .9s;
   backface-visibility:hidden;-webkit-backface-visibility:hidden;box-shadow:0 0 0 1px #24272D,0 10px 40px rgba(209,254,23,.06)}
-.page.turned{transform:rotateY(-178deg);pointer-events:none}
-.page::after{content:"";position:absolute;top:0;bottom:0;left:0;width:18px;background:linear-gradient(90deg,rgba(0,0,0,.12),rgba(0,0,0,0));pointer-events:none}
+.page.back{transform:rotateY(180deg)}
+.page::after{content:"";position:absolute;top:0;bottom:0;left:0;width:34px;background:linear-gradient(90deg,rgba(0,0,0,.5),rgba(0,0,0,0));pointer-events:none;z-index:5}
+.page.back::after{left:auto;right:0;background:linear-gradient(270deg,rgba(0,0,0,.5),rgba(0,0,0,0))}
+.page.back .folio{flex-direction:row-reverse}
+.edge{position:absolute;top:0;width:56px;height:1056px;z-index:9999;border:0;padding:0;margin:0;background:transparent;cursor:pointer;opacity:0;transition:opacity .2s}
+.edge:hover{opacity:1}
+.edge.l{background:linear-gradient(90deg,rgba(209,254,23,.18),rgba(209,254,23,0))}
+.edge.r{background:linear-gradient(270deg,rgba(209,254,23,.18),rgba(209,254,23,0))}
+.edge[hidden]{display:none}
 
 .toolbar{display:flex;align-items:center;gap:12px;padding:10px 16px 16px;color:#E9ECEF;flex-wrap:wrap;justify-content:center}
 .toolbar button,.toolbar select{font-family:inherit;font-size:16px;min-height:44px;border-radius:6px;cursor:pointer}
@@ -41,7 +50,7 @@ body{-webkit-print-color-adjust:exact;print-color-adjust:exact;background:var(--
 p{margin:0 0 12px;text-align:justify;hyphens:auto;-webkit-hyphens:auto}
 h2,h3{font-size:14pt;line-height:1.3;margin:0}
 h3{margin:0 0 6px}
-.small{font-size:14px;line-height:1.35;color:var(--slate)}
+.small{font-size:16px;line-height:1.35;color:var(--slate)}
 .cols{columns:2;column-gap:32px}
 .cols p{break-inside:auto}
 .folio{position:absolute;left:64px;right:64px;bottom:26px;display:flex;justify-content:space-between;align-items:center;font-size:14px;color:var(--slate);border-top:1px solid var(--line);padding-top:8px}
@@ -71,9 +80,9 @@ h3{margin:0 0 6px}
 .stat{padding:12px 16px 12px 0}
 .stat+.stat{border-left:1px solid var(--line);padding-left:16px}
 .stat .n{color:var(--chroma);font-size:46px;line-height:1;font-weight:700;letter-spacing:-1px}
-.stat .l{font-size:14px;line-height:1.35;margin-top:6px}
+.stat .l{font-size:16px;line-height:1.35;margin-top:6px}
 .bar{display:flex;align-items:center;gap:10px;margin:0 0 8px}
-.bar .lab{width:300px;flex:none;font-size:14px;line-height:1.3}
+.bar .lab{width:300px;flex:none;font-size:16px;line-height:1.3}
 .bar .track{flex:1;height:22px;background:#2C2F36;position:relative}
 .bar .fill{position:absolute;inset:0 auto 0 0;background:var(--ink)}
 .bar .fill.g{background:var(--chroma)}
@@ -107,12 +116,14 @@ td.num,th.num{text-align:right;white-space:nowrap}
   body{overflow:visible}
   .toolbar,.hint{display:none}
   .stage-wrap{display:block;padding:0}
-  .stage{width:auto!important;height:auto!important;perspective:none}
-  .book{position:static;transform:none!important;width:816px;height:auto}
-  .page{position:relative;transform:none!important;box-shadow:none;break-after:page;page-break-after:always}
+  .stage{width:auto!important;height:auto!important;overflow:visible!important}
+  .book{position:static;transform:none!important;width:816px;height:auto;perspective:none}
+  .leaf{position:static!important;transform:none!important;width:auto;height:auto}
+  .edge{display:none}
+  .page,.page.back{position:relative;transform:none!important;box-shadow:none;break-after:page;page-break-after:always}
   .page::after{display:none}
 }
-@media (prefers-reduced-motion:reduce){.page{transition:none}}
+@media (prefers-reduced-motion:reduce){.leaf,.book{transition:none}}
 .ex{display:grid;grid-template-columns:240px minmax(0,1fr);gap:20px;padding:12px 0;border-top:1px solid var(--line)}
 .ex .media{position:relative;height:138px;background:var(--panel);border:1px solid #2C2F36;overflow:hidden}
 .ex .media iframe,.ex .media video{position:absolute;inset:0;width:100%;height:100%;border:0;object-fit:cover;background:#000}
@@ -120,16 +131,16 @@ td.num,th.num{text-align:right;white-space:nowrap}
 .ex .ph .play{position:absolute;top:50%;left:50%;width:54px;height:54px;margin:-34px 0 0 -27px;border-radius:50%;background:var(--chroma)}
 .ex .ph .play::after{content:"";position:absolute;left:21px;top:16px;border-left:17px solid var(--dark);border-top:11px solid transparent;border-bottom:11px solid transparent}
 .ex .brand{font-size:14pt;font-weight:700;line-height:1.3;margin:0 0 2px}
-.ex .who{font-size:14px;color:var(--slate);margin-bottom:6px}
+.ex .who{font-size:16px;color:var(--slate);margin-bottom:6px}
 .ex p{margin:0 0 6px}
-.ex .nums{display:flex;gap:18px;flex-wrap:wrap;font-size:14px}
+.ex .nums{display:flex;gap:18px;flex-wrap:wrap;font-size:16px}
 .ex .nums b{color:var(--chroma);font-size:16px}
-a.watch{display:inline-block;margin-top:8px;color:var(--chroma);font-size:14px}
+a.watch{display:inline-block;margin-top:8px;color:var(--chroma);font-size:16px}
 </style>
 </head>
 <body>
 <main class="reader">
-<div class="stage-wrap"><div class="stage" id="stage"><div class="book" id="book">
+<div class="stage-wrap"><div class="stage" id="stage"><div class="book" id="book"><button class="edge l" id="edgeL" type="button" tabindex="-1" aria-hidden="true"></button><button class="edge r" id="edgeR" type="button" tabindex="-1" aria-hidden="true"></button>
 
 <!-- 1. PORTADA -->
 <section class="page cover" aria-label="Portada">
@@ -266,21 +277,21 @@ a.watch{display:inline-block;margin-top:8px;color:var(--chroma);font-size:14px}
       </figure>
     </div>
     <div style="background:var(--panel);color:var(--ink);padding:16px 20px;margin-bottom:16px">
-      <h3 style="color:var(--chroma)">Caso Coca-Cola: Navidad de 2025</h3>
+      <h3 style="color:var(--chroma)">La oportunidad de negocio para las pymes panameñas</h3>
       <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:6px 0 10px">
-        <div><div style="font-size:34px;font-weight:700;line-height:1">≈ 100</div><div style="font-size:14px;line-height:1.3;margin-top:4px">profesionales participaron</div></div>
-        <div><div style="font-size:34px;font-weight:700;line-height:1">5</div><div style="font-size:14px;line-height:1.3;margin-top:4px">especialistas en IA crearon el material base</div></div>
-        <div><div style="font-size:34px;font-weight:700;line-height:1">70 000</div><div style="font-size:14px;line-height:1.3;margin-top:4px">clips de video generados</div></div>
-        <div><div style="font-size:34px;font-weight:700;line-height:1">140+</div><div style="font-size:14px;line-height:1.3;margin-top:4px">países donde se emitiría</div></div>
+        <div><div style="font-size:34px;font-weight:700;line-height:1">73 %</div><div style="font-size:16px;line-height:1.3;margin-top:4px">de los mercadólogos ya produce imagen o video con IA</div></div>
+        <div><div style="font-size:34px;font-weight:700;line-height:1">72 %</div><div style="font-size:16px;line-height:1.3;margin-top:4px">de los empleados en Panamá usa IA con regularidad</div></div>
+        <div><div style="font-size:34px;font-weight:700;line-height:1">13 %</div><div style="font-size:16px;line-height:1.3;margin-top:4px">dice tener agentes de IA integrados: hay mercado por atender</div></div>
+        <div><div style="font-size:34px;font-weight:700;line-height:1">B/. 250</div><div style="font-size:16px;line-height:1.3;margin-top:4px">paquete de entrada de Escena IA Studio: 3 videos</div></div>
       </div>
-      <p style="margin:0">La producción habría pasado de casi un año a cerca de un mes, según The Wall Street Journal, citado por Merca2.0. Aun así, parte del público sintió que el anuncio carecía de alma (Sánchez Dimas, 2025).</p>
+      <p style="margin:0">La demanda de video con IA ya existe y crece: Higgsfield superó los US$ 1 000 millones anualizados en 18 meses. Las pymes panameñas la usan, pero casi ninguna la tiene integrada en su marketing. Escena IA Studio ocupa ese espacio con un servicio por paquetes, accesible y con voz de marca (eMarketer, s. f.; García Armuelles, 2025; Dealroom, 2026a).</p>
     </div>
-    <h3>¿Confía el público en los videos hechos con IA?</h3>
+    <h3>Lo que valora el público: la oportunidad de ofrecer video con criterio humano</h3>
     <div class="bar"><span class="lab">Ha visto un video que sospechó hecho con IA</span><span class="track"><span class="fill" style="width:83%"></span></span><span class="v">83 %</span></div>
     <div class="bar"><span class="lab">Valora más que el video sea personal y auténtico</span><span class="track"><span class="fill g" style="width:43%"></span></span><span class="v">43 %</span></div>
     <div class="bar"><span class="lab">Cree que un video con IA bajaría su opinión de la marca</span><span class="track"><span class="fill" style="width:36%"></span></span><span class="v">36 %</span></div>
     <div class="small" style="margin-bottom:12px">Encuesta de Animoto (2026) a más de 450 consumidores y mercadólogos de EE. UU.; mide sospecha, no detección comprobada.</div>
-    <p>La lección es doble. Ahorrar tiempo y costos no garantiza conexión emocional: el público rechaza la frialdad más que a la IA en sí (Sánchez Dimas, 2025). Además, los especialistas advierten riesgos de marca, de propiedad intelectual y de empleo, y recuerdan que la supervisión humana sigue siendo clave (Nicoud, 2024). Para la sociedad, el reto es usar la IA con transparencia y sin desplazar el talento creativo local.</p>
+    <p>La oportunidad está en ese hueco: el público no rechaza la IA, rechaza lo impersonal. Por eso el modelo de Escena IA Studio combina la velocidad y el bajo costo de la IA con supervisión humana y la voz de cada marca (Animoto, 2026; Nicoud, 2024). Para la sociedad, el beneficio es que más negocios locales accedan a video profesional sin desplazar el talento creativo local.</p>
   </div>
   <div class="folio"><span>Escena IA, edición n.º 1</span><b>5</b></div>
 </section>
@@ -305,10 +316,10 @@ a.watch{display:inline-block;margin-top:8px;color:var(--chroma);font-size:14px}
     <div class="bar"><span class="lab" style="width:120px">Septiembre de 2026</span><span class="track"><span class="fill g" style="width:100%"></span></span><span class="v" style="width:70px">1 000</span></div>
     <div class="small" style="margin-bottom:12px">Fuentes: TechCrunch (2026), Higgsfield (2026a) y Dealroom (2026a). Son proyecciones del ritmo de ventas, no ingresos auditados (The Next Web, 2026).</div>
     <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:2px solid var(--chroma);border-bottom:2px solid #4A4F58;margin-bottom:14px">
-      <div style="padding:10px 10px 10px 0"><div style="font-size:30px;font-weight:700;line-height:1;color:var(--chroma);white-space:nowrap;letter-spacing:-1px">5 400 M</div><div style="font-size:14px;line-height:1.3;margin-top:5px">dólares de valoración tras levantar US$ 400 M</div></div>
-      <div style="padding:10px;border-left:1px solid var(--line)"><div style="font-size:30px;font-weight:700;line-height:1;color:var(--chroma)">30 M+</div><div style="font-size:14px;line-height:1.3;margin-top:5px">usuarios en 238 países y territorios</div></div>
-      <div style="padding:10px;border-left:1px solid var(--line)"><div style="font-size:30px;font-weight:700;line-height:1;color:var(--chroma)">390</div><div style="font-size:14px;line-height:1.3;margin-top:5px">empresas de la lista Fortune 500 la usan</div></div>
-      <div style="padding:10px 0 10px 10px;border-left:1px solid var(--line)"><div style="font-size:30px;font-weight:700;line-height:1;color:var(--chroma)">42×</div><div style="font-size:14px;line-height:1.3;margin-top:5px">creció el uso de sus agentes en tres meses</div></div>
+      <div style="padding:10px 10px 10px 0"><div style="font-size:30px;font-weight:700;line-height:1;color:var(--chroma);white-space:nowrap;letter-spacing:-1px">5 400 M</div><div style="font-size:16px;line-height:1.3;margin-top:5px">dólares de valoración tras levantar US$ 400 M</div></div>
+      <div style="padding:10px;border-left:1px solid var(--line)"><div style="font-size:30px;font-weight:700;line-height:1;color:var(--chroma)">30 M+</div><div style="font-size:16px;line-height:1.3;margin-top:5px">usuarios en 238 países y territorios</div></div>
+      <div style="padding:10px;border-left:1px solid var(--line)"><div style="font-size:30px;font-weight:700;line-height:1;color:var(--chroma)">390</div><div style="font-size:16px;line-height:1.3;margin-top:5px">empresas de la lista Fortune 500 la usan</div></div>
+      <div style="padding:10px 0 10px 10px;border-left:1px solid var(--line)"><div style="font-size:30px;font-weight:700;line-height:1;color:var(--chroma)">42×</div><div style="font-size:16px;line-height:1.3;margin-top:5px">creció el uso de sus agentes en tres meses</div></div>
     </div>
     <h3>Lecciones para Escena IA Studio</h3>
     <p>Su caso deja tres ideas útiles para una pyme panameña: enfocarse en clientes profesionales que pagan por resultados, cambiar de rumbo cuando los datos lo piden y vender capacidad de producción además de suscripciones. De hecho, el peso de las suscripciones en sus ingresos bajó de más del 90 % a poco más del 60 % (Sacra, 2026). Su director también sostiene que, aunque la IA cambia los trabajos creativos, el buen gusto y las buenas ideas siguen siendo lo principal (Web Summit, 2026).</p>
@@ -321,14 +332,14 @@ a.watch{display:inline-block;margin-top:8px;color:var(--chroma);font-size:14px}
 <section class="page" aria-label="Ejemplos de anuncios hechos con Higgsfield">
   <div class="pad">
     <div class="slate"><span class="sc">Escena 6</span><h2>Tres anuncios reales hechos con Higgsfield</h2><span class="stripes" aria-hidden="true"></span></div>
-    <p>El patrón se repite: equipos pequeños que producen piezas de marca en horas o días, no en meses. Las cifras las reportan las propias marcas o Higgsfield, por lo que conviene leerlas como testimonios, no como estudios independientes.</p>
+    <p>Equipos pequeños producen piezas de marca en horas o días, no en meses. Las cifras las reportan las marcas o Higgsfield: son testimonios, no estudios independientes.</p>
 
     <article class="ex">
       <div class="media"><video src="videos/maradona.mp4" poster="videos/maradona.jpg" controls playsinline preload="none" aria-label="Video de la campaña Maradona Official hecho con Higgsfield"></video></div>
       <div>
         <div class="brand">Maradona Official</div>
         <div class="who">Estudio One of One · moda deportiva</div>
-        <p>El estudio creó con Higgsfield todo el mundo visual de la primera marca oficial de ropa de Maradona, lanzada alrededor del Mundial: fotos de producto, películas de campaña y piezas para redes, sin viajar a rodar a Buenos Aires ni a Nápoles (Higgsfield, 2026b).</p>
+        <p>El estudio creó con Higgsfield todo el mundo visual de la primera marca oficial de ropa de Maradona: fotos de producto, películas de campaña y piezas para redes, sin viajar a rodar (Higgsfield, 2026b).</p>
         <div class="nums"><span><b>3 semanas</b> para agotar la primera colección</span><span><b>10 M+</b> personas alcanzadas</span></div>
       </div>
     </article>
@@ -348,12 +359,12 @@ a.watch{display:inline-block;margin-top:8px;color:var(--chroma);font-size:14px}
       <div>
         <div class="brand">Finales de la NBA, Vertex CGI × ESPN</div>
         <div class="who">Estudio Vertex CGI · deporte y entretenimiento</div>
-        <p>Con el ganador desconocido hasta el último momento, el estudio preparó el video para los dos finalistas y lo publicó cinco días después de la primera reunión. Se hizo viral y lo retomó SportsCenter. El estudio atribuye a Higgsfield la rapidez: las ideas se generaban en vivo durante las llamadas (Higgsfield, 2026d).</p>
+        <p>Sin saber quién ganaría, el estudio preparó el video para los dos finalistas y lo publicó cinco días después de la primera reunión. Se hizo viral y lo retomó SportsCenter (Higgsfield, 2026d).</p>
         <div class="nums"><span><b>5 días</b> de idea a publicación</span><span><b>SportsCenter</b> lo retomó</span><span><b>25 mil M+</b> de vistas orgánicas del estudio</span></div>
       </div>
     </article>
 
-    <p style="margin-top:14px"><b>¿Y Coca-Cola?</b> Su anuncio navideño hecho con IA no se produjo con Higgsfield, sino con estudios especializados como Secret Level (Nicoud, 2024). Para una pyme panameña, el caso de Alya es más cercano: muestra lo que una sola persona puede lograr con estas herramientas.</p>
+    <p style="margin-top:14px"><b>¿Qué significa para Panamá?</b> Si equipos pequeños logran piezas de nivel internacional en días, una pyme panameña puede acceder a video profesional a una fracción del costo. Ese es el negocio de Escena IA Studio.</p>
   </div>
   <div class="folio"><span>Escena IA, edición n.º 1</span><b>7</b></div>
 </section>
@@ -410,9 +421,9 @@ a.watch{display:inline-block;margin-top:8px;color:var(--chroma);font-size:14px}
       <p>En lo formativo, el proyecto muestra que emprender hoy exige combinar creatividad, dirección y medición. El caso Higgsfield confirma que el mercado premia a quien resuelve un problema profesional concreto (Dealroom, 2026a). La misión, las zonas, las tarifas y los indicadores de esta edición son un punto de partida que debe validarse con clientes reales.</p>
     </div>
     <div style="margin-top:auto;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px">
-      <div style="background:var(--panel);color:var(--ink);padding:14px 16px"><b>La idea pesa más que la herramienta.</b><div style="font-size:14px;line-height:1.4;margin-top:4px">Gana quien tiene criterio creativo, no solo una suscripción.</div></div>
-      <div style="background:var(--chroma);color:var(--dark);padding:14px 16px"><b>Siempre un humano en el proceso.</b><div style="font-size:14px;line-height:1.4;margin-top:4px">Revisar y dar voz de marca protege la confianza.</div></div>
-      <div style="border:2px solid #4A4F58;padding:12px 14px"><b>Medir para mejorar.</b><div style="font-size:14px;line-height:1.4;margin-top:4px">Producir más rápido no demuestra resultados por sí solo.</div></div>
+      <div style="background:var(--panel);color:var(--ink);padding:14px 16px"><b>La idea pesa más que la herramienta.</b><div style="font-size:16px;line-height:1.4;margin-top:4px">Gana quien tiene criterio creativo, no solo una suscripción.</div></div>
+      <div style="background:var(--chroma);color:var(--dark);padding:14px 16px"><b>Siempre un humano en el proceso.</b><div style="font-size:16px;line-height:1.4;margin-top:4px">Revisar y dar voz de marca protege la confianza.</div></div>
+      <div style="border:2px solid #4A4F58;padding:12px 14px"><b>Medir para mejorar.</b><div style="font-size:16px;line-height:1.4;margin-top:4px">Producir más rápido no demuestra resultados por sí solo.</div></div>
     </div>
   </div>
   <div class="folio"><span>Escena IA, edición n.º 1</span><b>9</b></div>
@@ -437,7 +448,7 @@ a.watch{display:inline-block;margin-top:8px;color:var(--chroma);font-size:14px}
     </table>
     <div class="small" style="margin-bottom:14px">Fuentes: WebFX (s. f.) e Higgsfield (2026a). Verificar versiones y licencias de uso comercial.</div>
     <h3>Anexo B. Marcas que ya hacen video publicitario con IA</h3>
-    <p style="margin-bottom:2px">Coca-Cola, Heinz, Nike, Cadbury, Motorola, Virgin Voyages y Toys R Us.</p>
+    <p style="margin-bottom:2px">Heinz, Nike, Cadbury, Motorola, Virgin Voyages y Toys R Us.</p>
     <div class="small" style="margin-bottom:14px">Fuente: Kapwing (s. f.).</div>
     <h3>Anexo C. Buenas prácticas para un video con IA</h3>
     <ol style="margin:0 0 14px;padding-left:22px">
@@ -491,7 +502,6 @@ a.watch{display:inline-block;margin-top:8px;color:var(--chroma);font-size:14px}
       <p class="r">Nicoud, A. (2024, 23 de diciembre). Will 2025 be the year of AI-generated advertising? <i>IBM Think</i>. https://www.ibm.com/think/news/ai-generated-advertising-2025</p>
       <p class="r">Panamá América. (2025, 3 de junio). <i>Un 80 % de los gerentes de "marketing" se muestra optimista frente a la IA</i>. https://www.panamaamerica.com.pa/tecnologia/un-80-de-los-gerentes-de-marketing-se-muestra-optimista-frente-la-ia-1249728</p>
       <p class="r">Sacra. (2026). <i>Higgsfield</i>. https://sacra.com/c/higgsfield/</p>
-      <p class="r">Sánchez Dimas, J. (2025, 5 de noviembre). El caso Coca-Cola y las lecciones que deja el auge de la publicidad hecha con IA. <i>Merca2.0</i>. https://www.merca20.com/?p=12531406</p>
       <p class="r">TechCrunch. (2026, 15 de enero). <i>AI video startup Higgsfield, founded by ex-Snap exec, lands $1.3B valuation</i>. https://techcrunch.com/2026/01/15/ai-video-startup-higgsfield-founded-by-ex-snap-exec-lands-1-3b-valuation</p>
       <p class="r">The Next Web. (2026). <i>Higgsfield raised $400mn at $5.4bn, four times its January valuation</i>. https://thenextweb.com/news/higgsfield-series-b-400m-5-4bn-valuation-700m-revenue</p>
       <p class="r">Web Summit. (2026). <i>Accelerating creativity with AI</i>. https://qatar.websummit.com/summaries/qat26/accelerating-creativity-with-ai/</p>
@@ -501,6 +511,28 @@ a.watch{display:inline-block;margin-top:8px;color:var(--chroma);font-size:14px}
     <div class="small" style="margin-top:auto">Fotografías: Unsplash (licencia Unsplash, uso libre). Fotografía del autor: Manuel Guillén. Referencias en formato APA, 7.ª edición.</div>
   </div>
   <div class="folio"><span>Escena IA, edición n.º 1</span><b>12</b></div>
+</section>
+
+<!-- 9b. CRÉDITOS -->
+<section class="page" aria-label="Créditos">
+  <div class="pad">
+    <div class="slate"><span class="sc">Créditos</span><h2>Ficha de la edición</h2><span class="stripes" aria-hidden="true"></span></div>
+    <figure class="vf" style="height:230px;margin:0 0 20px">
+      <img src="https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=1400&q=75&auto=format&fit=crop" alt="Línea de tiempo de edición de video en una pantalla oscura">
+      <span class="tc"><i></i>00:00:10:00</span>
+    </figure>
+    <div style="display:grid;grid-template-columns:150px minmax(0,1fr);gap:10px 18px;border-top:2px solid var(--chroma);padding-top:14px">
+      <b>Revista</b><span>Escena IA, edición n.º 1, noviembre de 2026. Revista digital en línea de periodicidad semestral.</span>
+      <b>Autor</b><span>Manuel Guillén, Universidad Tecnológica de Panamá.</span>
+      <b>Curso</b><span>Formación Empresarial. Docente: Josefina Camargo.</span>
+      <b>Contacto</b><span>linkedin.com/in/manuel-guillen-castillo</span>
+      <b>Próxima edición</b><span>Mayo de 2027.</span>
+      <b>Imágenes</b><span>Fotografías de Unsplash.</span>
+      <b>Videos</b><span>Casos de estudio publicados por Higgsfield (2026b, 2026c, 2026d).</span>
+      <b>Aviso</b><span>Las cifras de las marcas las reportan ellas mismas o Higgsfield. Las tarifas son una propuesta del autor que debe validarse con clientes reales.</span>
+    </div>
+  </div>
+  <div class="folio"><span>Escena IA, edición n.º 1</span><b>13</b></div>
 </section>
 
 <!-- 10. CONTRAPORTADA -->
@@ -521,57 +553,107 @@ a.watch{display:inline-block;margin-top:8px;color:var(--chroma);font-size:14px}
 </div></div></div>
 
 <nav class="toolbar" aria-label="Navegación de la revista">
-  <button id="prev" type="button">Página anterior</button>
-  <div class="counter" aria-live="polite"><span class="rec" aria-hidden="true"></span><span id="count">1 de 13</span></div>
-  <button id="next" type="button">Página siguiente</button>
+  <button id="prev" type="button">Anterior</button>
+  <div class="counter" aria-live="polite"><span class="rec" aria-hidden="true"></span><span id="count">Portada</span></div>
+  <button id="next" type="button">Siguiente</button>
   <label class="sr" style="position:absolute;left:-9999px" for="jump">Ir a la sección</label>
   <select id="jump">
     <option value="1">Portada</option><option value="2">Introducción</option><option value="3">Biografía</option>
     <option value="4">Misión y formación</option><option value="5">Comunidad e impacto</option><option value="6">Caso Higgsfield</option>
-    <option value="7">Anuncios con Higgsfield</option><option value="8">Zonas y tarifas</option><option value="9">Conclusión</option><option value="10">Anexos</option><option value="11">Bibliografía</option><option value="13">Contraportada</option>
+    <option value="7">Anuncios con Higgsfield</option><option value="8">Zonas y tarifas</option><option value="9">Conclusión</option><option value="10">Anexos</option><option value="11">Bibliografía</option><option value="12">Bibliografía (cont.)</option><option value="13">Créditos</option><option value="14">Contraportada</option>
   </select>
 </nav>
-<div class="hint">Usa las flechas del teclado o desliza el dedo para pasar las páginas.</div>
+<div class="hint">Haz clic en el borde de una página, usa las flechas del teclado o desliza el dedo para pasar las páginas.</div>
 </main>
 
 <style>.r{padding-left:36px;text-indent:-36px;text-align:left;margin:0 0 8px;word-break:break-word}.toc a{color:var(--chroma)}</style>
 <script>
 (function(){
   var pages=[].slice.call(document.querySelectorAll('.page'));
-  var N=pages.length, cur=0;
+  var N=pages.length, L=Math.floor(N/2);
   var stage=document.getElementById('stage'), book=document.getElementById('book');
   var prev=document.getElementById('prev'), next=document.getElementById('next');
   var count=document.getElementById('count'), jump=document.getElementById('jump');
+  var edgeL=document.getElementById('edgeL'), edgeR=document.getElementById('edgeR');
+  var leaves=[], cur=0, single=false, s=1, lastF=0, timers=[];
+
+  /* Cada hoja tiene dos caras: frente (página impar) y reverso (página par). */
+  for(var i=0;i<L;i++){
+    var lf=document.createElement('div'); lf.className='leaf';
+    lf.appendChild(pages[2*i]); pages[2*i+1].classList.add('back'); lf.appendChild(pages[2*i+1]);
+    book.appendChild(lf); leaves.push(lf);
+  }
+
+  function spread(p){return Math.floor((p+1)/2);}      /* hojas pasadas */
+  function spreadPage(f){return f===0?0:2*f-1;}       /* primera página visible */
 
   function render(){
+    var f=spread(cur), vis=single?[cur]:(f===0?[0]:f===L?[N-1]:[2*f-1,2*f]);
     pages.forEach(function(p,i){
-      p.style.zIndex=N-i;
-      p.classList.toggle('turned',i<cur);
-      var hidden=i!==cur;
+      var hidden=vis.indexOf(i)<0;
       p.setAttribute('aria-hidden',hidden);
       if('inert' in p) p.inert=hidden;
       if(hidden) p.querySelectorAll('video').forEach(function(v){v.pause()});
     });
-    count.textContent=(cur+1)+' de '+N;
-    prev.disabled=cur===0; next.disabled=cur===N-1;
-    jump.value=String(cur+1);
-    if(history.replaceState) history.replaceState(null,'','#p'+(cur+1));
+    timers.forEach(clearTimeout); timers=[];
+    leaves.forEach(function(lf,i){
+      var flipped=i<f, was=i<lastF, moving=flipped!==was;
+      lf.classList.toggle('flipped',flipped);
+      var settled=flipped?i+1:L-i;
+      if(moving){
+        lf.style.transitionDelay=(Math.abs(i-(flipped?lastF:lastF-1))*70)+'ms';
+        lf.style.zIndex=100+(flipped?i:L-i);
+        timers.push(setTimeout(function(){lf.style.zIndex=settled;lf.style.transitionDelay='0ms'},1100+Math.abs(f-lastF)*70));
+      } else lf.style.zIndex=settled;
+    });
+    lastF=f;
+    var first=single?cur:spreadPage(f);
+    count.textContent=single?(cur+1)+' de '+N:(f===0?'Portada':f===L?'Contraportada':'Págs. '+(2*f)+'–'+(2*f+1)+' de '+N);
+    prev.disabled=single?cur===0:f===0; next.disabled=single?cur===N-1:f===L;
+    var best=jump.options[0].value;
+    [].forEach.call(jump.options,function(o){if(parseInt(o.value,10)<=first+1) best=o.value;});
+    jump.value=best;
+    if(history.replaceState) history.replaceState(null,'','#p'+(first+1));
+    position(true);
   }
-  function go(i){cur=Math.max(0,Math.min(N-1,i));render();}
+
+  function position(animate){
+    var f=spread(cur), c;
+    if(single) c=(cur%2===0)?1224:408; else c=f===0?1224:f===L?408:816;
+    var left=single?c-408:(f===0?816:0), right=single?c+408:(f===L?816:1632);
+    var stageW=(single?816:1632)*s;
+    if(!animate) book.style.transition='none';
+    book.style.transform='translateX('+(stageW/2-c*s)+'px) scale('+s+')';
+    edgeL.style.left=left+'px'; edgeR.style.left=(right-56)+'px';
+    edgeL.hidden=single?cur===0:f===0; edgeR.hidden=single?cur===N-1:f===L;
+    if(!animate){book.offsetWidth; book.style.transition='';}
+  }
+
+  function go(p){cur=Math.max(0,Math.min(N-1,p)); if(!single) cur=spreadPage(spread(cur)); render();}
+  function step(d){
+    if(single) go(cur+d);
+    else go(spreadPage(Math.max(0,Math.min(L,spread(cur)+d))));
+  }
   function fit(){
     var bar=document.querySelector('.toolbar').offsetHeight+document.querySelector('.hint').offsetHeight;
     var w=window.innerWidth-32, h=window.innerHeight-bar-28;
-    var s=Math.min(w/816,h/1056,1.25);
-    stage.style.width=(816*s)+'px'; stage.style.height=(1056*s)+'px';
-    book.style.transform='scale('+s+')';
+    var wasSingle=single; single=window.innerWidth<1000;
+    if(single!==wasSingle) stage.classList.toggle('single',single);
+    s=Math.min(w/(single?816:1632),h/1056,1.25);
+    stage.style.width=((single?816:1632)*s)+'px'; stage.style.height=(1056*s)+'px';
+    if(!single&&wasSingle!==single) cur=spreadPage(spread(cur));
+    position(false);
   }
-  prev.addEventListener('click',function(){go(cur-1)});
-  next.addEventListener('click',function(){go(cur+1)});
+
+  prev.addEventListener('click',function(){step(-1)});
+  next.addEventListener('click',function(){step(1)});
+  edgeL.addEventListener('click',function(){step(-1)});
+  edgeR.addEventListener('click',function(){step(1)});
   jump.addEventListener('change',function(){go(parseInt(jump.value,10)-1)});
   document.addEventListener('keydown',function(e){
     if(e.target===jump) return;
-    if(e.key==='ArrowRight'||e.key==='PageDown'){go(cur+1);e.preventDefault();}
-    if(e.key==='ArrowLeft'||e.key==='PageUp'){go(cur-1);e.preventDefault();}
+    if(e.key==='ArrowRight'||e.key==='PageDown'){step(1);e.preventDefault();}
+    if(e.key==='ArrowLeft'||e.key==='PageUp'){step(-1);e.preventDefault();}
   });
   document.querySelectorAll('[data-go]').forEach(function(a){
     a.addEventListener('click',function(e){e.preventDefault();go(parseInt(a.getAttribute('data-go'),10)-1);});
@@ -580,11 +662,17 @@ a.watch{display:inline-block;margin-top:8px;color:var(--chroma);font-size:14px}
   stage.addEventListener('touchstart',function(e){x0=e.touches[0].clientX},{passive:true});
   stage.addEventListener('touchend',function(e){
     if(x0===null) return; var dx=e.changedTouches[0].clientX-x0; x0=null;
-    if(Math.abs(dx)>50) go(dx<0?cur+1:cur-1);
+    if(Math.abs(dx)>50) step(dx<0?1:-1);
   });
   window.addEventListener('resize',fit);
   var m=/#p(\d+)/.exec(location.hash); if(m) cur=Math.max(0,Math.min(N-1,parseInt(m[1],10)-1));
-  fit(); render();
+  fit();
+  lastF=spread(single?cur:spreadPage(spread(cur)));
+  if(!single) cur=spreadPage(spread(cur));
+  leaves.forEach(function(lf){lf.style.transition='none'});
+  render();
+  book.offsetWidth;
+  leaves.forEach(function(lf){lf.style.transition=''});
 })();
 </script>
 </body>
