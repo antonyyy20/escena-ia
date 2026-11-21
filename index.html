@@ -23,7 +23,7 @@ body{-webkit-print-color-adjust:exact;print-color-adjust:exact;background:var(--
 .leaf{position:absolute;top:0;left:816px;width:816px;height:1056px;transform-origin:left center;transform-style:preserve-3d;transition:transform .9s cubic-bezier(.45,.05,.2,1)}
 .leaf.flipped{transform:rotateY(-180deg)}
 .page{position:absolute;inset:0;width:816px;height:1056px;overflow:hidden;background:var(--paper);
-  backface-visibility:hidden;-webkit-backface-visibility:hidden;box-shadow:0 0 0 1px #24272D,0 10px 40px rgba(209,254,23,.06)}
+  isolation:isolate;transform:translateZ(0);backface-visibility:hidden;-webkit-backface-visibility:hidden;box-shadow:0 0 0 1px #24272D,0 10px 40px rgba(209,254,23,.06)}
 .page.back{transform:rotateY(180deg)}
 .page::after{content:"";position:absolute;top:0;bottom:0;left:0;width:34px;background:linear-gradient(90deg,rgba(0,0,0,.5),rgba(0,0,0,0));pointer-events:none;z-index:5}
 .page.back::after{left:auto;right:0;background:linear-gradient(270deg,rgba(0,0,0,.5),rgba(0,0,0,0))}
@@ -121,7 +121,7 @@ td.num,th.num{text-align:right;white-space:nowrap}
   .book{position:static;transform:none!important;width:816px;height:auto;perspective:none}
   .leaf{position:static!important;transform:none!important;width:auto;height:auto}
   .edge{display:none}
-  .page,.page.back{position:relative;transform:none!important;box-shadow:none;break-after:page;page-break-after:always}
+  .page,.page.back{visibility:visible!important;position:relative;transform:none!important;box-shadow:none;break-after:page;page-break-after:always}
   .page::after{display:none}
 }
 @media (prefers-reduced-motion:reduce){.leaf,.book{transition:none}}
@@ -574,7 +574,7 @@ a.watch{display:inline-block;margin-top:8px;color:var(--chroma);font-size:16px}
   var prev=document.getElementById('prev'), next=document.getElementById('next');
   var count=document.getElementById('count'), jump=document.getElementById('jump');
   var edgeL=document.getElementById('edgeL'), edgeR=document.getElementById('edgeR');
-  var leaves=[], cur=0, single=false, s=1, lastF=0, timers=[];
+  var leaves=[], cur=0, single=false, s=1, lastF=0, timers=[], prevVis=[], hideT=null;
 
   /* Cada hoja tiene dos caras: frente (página impar) y reverso (página par). */
   for(var i=0;i<L;i++){
@@ -594,6 +594,12 @@ a.watch{display:inline-block;margin-top:8px;color:var(--chroma);font-size:16px}
       if('inert' in p) p.inert=hidden;
       if(hidden) p.querySelectorAll('video').forEach(function(v){v.pause()});
     });
+    /* Solo se dibujan las páginas visibles (y las del giro en curso): así nada se traspasa desde el otro lado de la hoja. */
+    var keep=vis.concat(prevVis);
+    pages.forEach(function(p,i){p.style.visibility=keep.indexOf(i)<0?'hidden':'';});
+    clearTimeout(hideT);
+    hideT=setTimeout(function(){pages.forEach(function(p,i){p.style.visibility=vis.indexOf(i)<0?'hidden':'';});},1300+Math.abs(f-lastF)*70);
+    prevVis=vis;
     timers.forEach(clearTimeout); timers=[];
     leaves.forEach(function(lf,i){
       var flipped=i<f, was=i<lastF, moving=flipped!==was;
